@@ -1,6 +1,5 @@
 import torch
 import torch.nn as nn
-import torch.nn.functional as F
 
 
 class EncoderCNN(nn.Module):
@@ -17,26 +16,19 @@ class EncoderCNN(nn.Module):
         # You can use any Conv layer parameters, use pooling or only strides,
         # use any activation functions, use BN or Dropout, etc.
         # ====== YOUR CODE: ======
-        next_out_channels = 64
-        # 4×4 64 conv , BNorm, ReLU
-        modules.append(nn.Conv2d(in_channels, next_out_channels, 4, 2, 1, bias=False))
-        modules.append(nn.BatchNorm2d(next_out_channels))
+        modules.append(nn.Conv2d(in_channels, 64, 4, 2, 1, bias=False))
+        modules.append(nn.BatchNorm2d(64))
         modules.append(nn.ReLU(inplace=True))
-        next_in_channels = next_out_channels
-        next_out_channels = next_out_channels * 2
-        # 4×4 128 conv , BNorm, ReLU
-        modules.append(nn.Conv2d(next_in_channels, next_out_channels, 4, 2, 1, bias=False))
-        modules.append(nn.BatchNorm2d(next_out_channels))
+
+        modules.append(nn.Conv2d(64, 128, 4, 2, 1, bias=False))
+        modules.append(nn.BatchNorm2d(128))
         modules.append(nn.ReLU(inplace=True))
-        next_in_channels = next_out_channels
-        next_out_channels = next_out_channels * 2
-        # 4×4 256 conv , BNorm, ReLU
-        modules.append(nn.Conv2d(next_in_channels, next_out_channels, 4, 2, 1, bias=False))
-        modules.append(nn.BatchNorm2d(next_out_channels))
+
+        modules.append(nn.Conv2d(128, 256, 4, 2, 1, bias=False))
+        modules.append(nn.BatchNorm2d(256))
         modules.append(nn.ReLU(inplace=True))
-        # final layer
-        next_in_channels = next_out_channels
-        modules.append(nn.Conv2d(next_in_channels, out_channels, 4, 1, 0, bias=False))
+
+        modules.append(nn.Conv2d(256, out_channels, 4, 1, 0, bias=False))
         # ========================
         self.cnn = nn.Sequential(*modules)
 
@@ -60,21 +52,19 @@ class DecoderCNN(nn.Module):
         # ====== YOUR CODE: ======
         next_in_channels = in_channels
         next_out_channels = 256
-        modules.append(nn.ConvTranspose2d(next_in_channels, next_out_channels, 4, 1, 0, bias=False))
-        modules.append(nn.BatchNorm2d(next_out_channels))
+        modules.append(nn.ConvTranspose2d(in_channels, 256, 4, 1, 0, bias=False))
+        modules.append(nn.BatchNorm2d(256))
         modules.append(nn.ReLU(True))
-        next_in_channels = next_out_channels
-        next_out_channels = next_out_channels // 2
-        modules.append(nn.ConvTranspose2d(next_in_channels, next_out_channels, 4, 2, 1, bias=False))
-        modules.append(nn.BatchNorm2d(next_out_channels))
+
+        modules.append(nn.ConvTranspose2d(256, 128, 4, 2, 1, bias=False))
+        modules.append(nn.BatchNorm2d(128))
         modules.append(nn.ReLU(True))
-        next_in_channels = next_out_channels
-        next_out_channels = next_out_channels // 2
-        modules.append(nn.ConvTranspose2d(next_in_channels, next_out_channels, 4, 2, 1, bias=False))
-        modules.append(nn.BatchNorm2d(next_out_channels))
+
+        modules.append(nn.ConvTranspose2d(128, 64, 4, 2, 1, bias=False))
+        modules.append(nn.BatchNorm2d(64))
         modules.append(nn.ReLU(True))
-        next_in_channels = next_out_channels
-        modules.append(nn.ConvTranspose2d(next_in_channels, out_channels, 4, 2, 1, bias=False))
+
+        modules.append(nn.ConvTranspose2d(64, out_channels, 4, 2, 1, bias=False))
         # ========================
         self.cnn = nn.Sequential(*modules)
 
@@ -158,7 +148,7 @@ class VAE(nn.Module):
             # Generate n latent space samples and return their reconstructions.
             # Remember that for the model, this is like inference.
             # ====== YOUR CODE: ======
-            zs = torch.randn((n, self.z_dim), device = device)
+            zs = torch.randn((n, self.z_dim), device=device)
             samples = self.decode(zs)
             samples = samples.to('cpu')
             # ========================
@@ -183,16 +173,16 @@ def vae_loss(x, xr, z_mu, z_log_sigma2, x_sigma2):
         - The KL divergence loss term
     all three are scalars, averaged over the batch dimension.
     """
-    loss, data_loss, kldiv_loss = None, None, None
+    loss, data_loss, kl_divergence_loss = None, None, None
     # TODO: Implement the VAE pointwise loss calculation.
     # Remember:
     # 1. The covariance matrix of the posterior is diagonal.
     # 2. You need to average over the batch dimension.
     # ====== YOUR CODE: ======
-    N = x.size(0)
+    n = x.size(0)
     data_loss = nn.functional.mse_loss(x, xr)
-    kldiv_loss = (1 + z_log_sigma2 - z_mu.pow(2) - z_log_sigma2.exp()).sum() / N
-    loss = (1/x_sigma2) * data_loss - kldiv_loss
+    kl_divergence_loss = (1 + z_log_sigma2 - z_mu.pow(2) - z_log_sigma2.exp()).sum() / n
+    loss = (1 / x_sigma2) * data_loss - kl_divergence_loss
     # ========================
 
-    return loss, data_loss, kldiv_loss
+    return loss, data_loss, kl_divergence_loss

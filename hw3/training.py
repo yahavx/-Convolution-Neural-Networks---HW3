@@ -53,11 +53,11 @@ class Trainer(abc.ABC):
         :param post_epoch_fn: A function to call after each epoch completes.
         :return: A FitResult object containing train and test losses per epoch.
         """
-        actual_num_epochs = 0
+        total_epochs = 0
         train_loss, train_acc, test_loss, test_acc = [], [], [], []
 
         best_acc = None
-        epochs_without_improvement = 0
+        epochs_no_improvement = 0
 
         checkpoint_filename = None
         if checkpoints is not None:
@@ -68,12 +68,12 @@ class Trainer(abc.ABC):
                 saved_state = torch.load(checkpoint_filename,
                                          map_location=self.device)
                 best_acc = saved_state.get('best_acc', best_acc)
-                epochs_without_improvement =\
-                    saved_state.get('ewi', epochs_without_improvement)
+                epochs_no_improvement =\
+                    saved_state.get('ewi', epochs_no_improvement)
                 self.model.load_state_dict(saved_state['model_state'])
 
         for epoch in range(num_epochs):
-            save_checkpoint = False
+            # save_checkpoint = False
             verbose = False  # pass this to train/test_epoch.
             if epoch % print_every == 0 or epoch == num_epochs - 1:
                 verbose = True
@@ -85,31 +85,31 @@ class Trainer(abc.ABC):
             # - Implement early stopping. This is a very useful and
             #   simple regularization technique that is highly recommended.
             # ====== YOUR CODE: ======
-            actual_num_epochs += 1
+            total_epochs += 1
             
             train_result = self.train_epoch(dl_train)
             test_result = self.test_epoch(dl_test)
-            train_loss.append((sum(train_result.losses)/len(train_result.losses)))
+            train_loss.append((sum(train_result.losses) / len(train_result.losses)))
             train_acc.append(train_result.accuracy)
-            test_loss.append((sum(test_result.losses)/len(test_result.losses)))
+            test_loss.append((sum(test_result.losses) / len(test_result.losses)))
             test_acc.append(test_result.accuracy)
             
             if best_acc is not None and best_acc >= test_acc[-1]:
-                epochs_without_improvement += 1
+                epochs_no_improvement += 1
                 save_checkpoint = False
             else:
                 best_acc = test_acc[-1]
-                epochs_without_improvement = 0
+                epochs_no_improvement = 0
                 save_checkpoint = True  # Save when there's an improvement
                 
-            if epochs_without_improvement == early_stopping:
+            if epochs_no_improvement == early_stopping:
                 break
             # ========================
 
             # Save model checkpoint if requested
             if save_checkpoint and checkpoint_filename is not None:
                 saved_state = dict(best_acc=best_acc,
-                                   ewi=epochs_without_improvement,
+                                   ewi=epochs_no_improvement,
                                    model_state=self.model.state_dict())
                 torch.save(saved_state, checkpoint_filename)
                 print(f'*** Saved checkpoint {checkpoint_filename} '
@@ -118,7 +118,7 @@ class Trainer(abc.ABC):
             if post_epoch_fn:
                 post_epoch_fn(epoch, train_result, test_result, verbose)
 
-        return FitResult(actual_num_epochs,
+        return FitResult(total_epochs,
                          train_loss, train_acc, test_loss, test_acc)
 
     def train_epoch(self, dl_train: DataLoader, **kw) -> EpochResult:
