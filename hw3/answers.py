@@ -78,42 +78,38 @@ An equation: $e^{i\pi} -1 = 0$
 
 
 def part2_vae_hyperparams():
-    hypers = dict(
-        batch_size=0,
-        h_dim=0, z_dim=0, x_sigma2=0,
-        learn_rate=0.0, betas=(0.0, 0.0),
-    )
+    # hypers = dict(
+    #     batch_size=0,
+    #     h_dim=0, z_dim=0, x_sigma2=0,
+    #     learn_rate=0.0, betas=(0.0, 0.0),
+    # )
     # TODO: Tweak the hyperparameters to generate a former president.
     # ====== YOUR CODE: ======
-    raise NotImplementedError()
+    hypers = dict(
+        batch_size=10,
+        h_dim=256, z_dim=128, x_sigma2=0.5,
+        learn_rate=0.001, betas=(0.9, 0.999),
+    )
     # ========================
     return hypers
 
 
 part2_q1 = r"""
-**Your answer:**
-
-
-Write your answer using **markdown** and $\LaTeX$:
-```python
-# A code block
-a = 2
-```
-An equation: $e^{i\pi} -1 = 0$
-
+$\sigma^2$ determines the balance between the impact of the reconstruction loss and the KL divergence term. 
+When it's higher, the reconstruction influences less on the overall loss, so during optimization, the emphasis shifts
+towards minimizing the KL divergence from the prior distribution.
+In the other case, when it's smaller, the reconstruction influences more on the overall loss, so during optimization,
+we will focus more on minimizing the reconstruction loss.
 """
 
 part2_q2 = r"""
-**Your answer:**
+1. The purpose of the reconstruction loss is to encourage the model to generate outputs that are simliar to the inputs, which is our main task.
+The purpose of the KL divergence loss is to avoid overfitting (regularization), by encouraging the latent space to approximate the chosen prior distribution (usually normal distribution).
 
+2. The loss term of the KL divergence is determined by the distance between the latent-space distribution to the prior distribution. In other words, this term penalizes the latent-space distribution 
+of the model for not being close to the prior distribution.
 
-Write your answer using **markdown** and $\LaTeX$:
-```python
-# A code block
-a = 2
-```
-An equation: $e^{i\pi} -1 = 0$
-
+3. This is a regularization term, the benefit of it is that it helps avoiding overfitting. Without it, the model would tend to find representations that works well with the training data, but it wouldn't be able to generalize to unseen data.
 """
 
 # ==============

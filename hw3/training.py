@@ -85,7 +85,25 @@ class Trainer(abc.ABC):
             # - Implement early stopping. This is a very useful and
             #   simple regularization technique that is highly recommended.
             # ====== YOUR CODE: ======
-            raise NotImplementedError()
+            actual_num_epochs += 1
+            
+            train_result = self.train_epoch(dl_train)
+            test_result = self.test_epoch(dl_test)
+            train_loss.append((sum(train_result.losses)/len(train_result.losses)))
+            train_acc.append(train_result.accuracy)
+            test_loss.append((sum(test_result.losses)/len(test_result.losses)))
+            test_acc.append(test_result.accuracy)
+            
+            if best_acc is not None and best_acc >= test_acc[-1]:
+                epochs_without_improvement += 1
+                save_checkpoint = False
+            else:
+                best_acc = test_acc[-1]
+                epochs_without_improvement = 0
+                save_checkpoint = True  # Save when there's an improvement
+                
+            if epochs_without_improvement == early_stopping:
+                break
             # ========================
 
             # Save model checkpoint if requested
@@ -262,7 +280,11 @@ class VAETrainer(Trainer):
         x = x.to(self.device)  # Image batch (N,C,H,W)
         # TODO: Train a VAE on one batch.
         # ====== YOUR CODE: ======
-        raise NotImplementedError()
+        xr, mu, log_sigma2 = self.model(x)
+        loss, data_loss, kldiv_loss = self.loss_fn(x, xr, mu, log_sigma2)
+        self.optimizer.zero_grad()
+        loss.backward()
+        self.optimizer.step()
         # ========================
 
         return BatchResult(loss.item(), 1/data_loss.item())
@@ -274,7 +296,8 @@ class VAETrainer(Trainer):
         with torch.no_grad():
             # TODO: Evaluate a VAE on one batch.
             # ====== YOUR CODE: ======
-            raise NotImplementedError()
+            x_rec, mu, log_sigma2 = self.model(x)
+            loss, data_loss, kldiv_loss = self.loss_fn(x, x_rec, mu, log_sigma2)
             # ========================
 
         return BatchResult(loss.item(), 1/data_loss.item())
