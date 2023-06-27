@@ -14,35 +14,28 @@ def part1_generation_params():
     temperature = .0001
     # TODO: Tweak the parameters to generate a literary masterpiece.
     # ====== YOUR CODE: ======
-    raise NotImplementedError()
+    start_seq = "To be, or not to be: that is the question."
+    temperature = 0.5
     # ========================
     return start_seq, temperature
 
 
 part1_q1 = r"""
-**Your answer:**
-
-
-Write your answer using **markdown** and $\LaTeX$:
-```python
-# A code block
-a = 2
-```
-An equation: $e^{i\pi} -1 = 0$
-
+We split the corpus into sequences instead of training on the entire text for several reasons.
+First for memory reasons because loading an entire text can consume memory so significantly
+that it will not be possible to load the entire text and train. Keep in mind that sometimes
+our processing capabilities are limited. Another reason, is more effective training, so train
+a batch of samples when each sample is a sequence. Another reason, following on from the
+previous one, that is more relevant to word-level RNN is the fact that the GRU's memory
+capacity is limited (that's why we got the LSTM and later the Transformers) and training
+on a long sequence can damage the training ability because the gradients are getting weaker
+and the ability to correct distant predictions are getting smaller.
 """
 
 part1_q2 = r"""
-**Your answer:**
-
-
-Write your answer using **markdown** and $\LaTeX$:
-```python
-# A code block
-a = 2
-```
-An equation: $e^{i\pi} -1 = 0$
-
+In fact, the hidden state can be used repeatedly (by re-feeding it to the network) to generate
+additional character predictions and do so cyclically for whatever length we want.
+The hidden state encodes the system's memory, so it can be used to generate additional characters.
 """
 
 part1_q3 = r"""
@@ -59,16 +52,17 @@ An equation: $e^{i\pi} -1 = 0$
 """
 
 part1_q4 = r"""
-**Your answer:**
-
-
-Write your answer using **markdown** and $\LaTeX$:
-```python
-# A code block
-a = 2
-```
-An equation: $e^{i\pi} -1 = 0$
-
+1. We lower the temperature for sampling because in this way (as we saw in the graph) we get a
+distribution on the characters that is less and less close to a uniform distribution.
+This way we can increase the chance of sampling the char(s) with the highest scores (probabilities)
+compared to the others and get better sequences (hopefully). </br>
+2. When the temperature is very high, the sampling distribution becomes more and more close to
+uniform and thus the characters are chosen randomly. It happens because we get $\vec{y}/T=0$ when
+$T$ increases and then $e^{\vec{y}/T}=1$ for every char. If the scores for softmax are equal, 
+we get a uniform distribution $\mathrm{softmax}_T(\vec{y}) = \frac{1}{k}$.
+3. When the temperature is very low, the sampling distribution becomes less and less close to
+uniform and thus the characters are chosen based on the model's predictions according to the
+highest probabilities. In fact the function emphasizes the differences between the chars.
 """
 # ==============
 

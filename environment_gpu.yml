@@ -26,4 +26,3 @@ dependencies:
     - nbmerge
     - pytest-xdist
     - atari-py
-    - box2d-py
