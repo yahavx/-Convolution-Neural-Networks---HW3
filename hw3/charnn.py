@@ -232,22 +232,22 @@ class MultilayerGRU(nn.Module):
                 row_dim = h_dim
             else:
                 row_dim = in_dim
-
+            # update gate
             xz = nn.Linear(row_dim, h_dim, bias=False).to(self.device)
             self.add_module('xz_{}'.format(layer), module=xz)
             hz = nn.Linear(h_dim, h_dim).to(self.device)
             self.add_module('hz_{}'.format(layer), module=hz)
-
+            # reset gate
             xr = nn.Linear(row_dim, h_dim, bias=False).to(self.device)
             self.add_module('xr_{}'.format(layer), module=xr)
             hr = nn.Linear(h_dim, h_dim).to(self.device)
             self.add_module('hr_{}'.format(layer), module=hr)
-
+            # candidate hidden state
             xg = nn.Linear(row_dim, h_dim, bias=False).to(self.device)
             self.add_module('xg_{}'.format(layer), module=xg)
             hg = nn.Linear(h_dim, h_dim).to(self.device)
             self.add_module('hg_{}'.format(layer), module=hg)
-
+            # drop
             drop = nn.Dropout(dropout).to(self.device)
             self.add_module('dropout_{}'.format(layer), module=drop)
 

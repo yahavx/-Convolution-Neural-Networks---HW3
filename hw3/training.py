@@ -100,7 +100,7 @@ class Trainer(abc.ABC):
             else:
                 best_acc = test_acc[-1]
                 epochs_no_improvement = 0
-                save_checkpoint = True  # Save when there's an improvement
+                save_checkpoint = True
                 
             if epochs_no_improvement == early_stopping:
                 break

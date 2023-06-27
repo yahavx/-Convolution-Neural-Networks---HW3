@@ -59,7 +59,7 @@ compared to the others and get better sequences (hopefully). </br>
 2. When the temperature is very high, the sampling distribution becomes more and more close to
 uniform and thus the characters are chosen randomly. It happens because we get $\vec{y}/T=0$ when
 $T$ increases and then $e^{\vec{y}/T}=1$ for every char. If the scores for softmax are equal, 
-we get a uniform distribution $\mathrm{softmax}_T(\vec{y}) = \frac{1}{k}$.
+we get a uniform distribution $\mathrm{softmax}_T(\vec{y}) = \frac{1}{k}$.</br>
 3. When the temperature is very low, the sampling distribution becomes less and less close to
 uniform and thus the characters are chosen based on the model's predictions according to the
 highest probabilities. In fact the function emphasizes the differences between the chars.
