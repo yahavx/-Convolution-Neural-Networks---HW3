@@ -39,16 +39,11 @@ The hidden state encodes the system's memory, so it can be used to generate addi
 """
 
 part1_q3 = r"""
-**Your answer:**
-
-
-Write your answer using **markdown** and $\LaTeX$:
-```python
-# A code block
-a = 2
-```
-An equation: $e^{i\pi} -1 = 0$
-
+We are not shuffling the order of batches when training because of the sequential nature of the
+samples in the data set and therefore we would like to keep this information that represents
+the meaning of the sentence. This is different from a classification task for images, where
+there is no relation of order or dependence between the images (each image stands alone),
+so we will shuffle.
 """
 
 part1_q4 = r"""
